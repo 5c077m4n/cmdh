@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+poetry run python -m black **/*.py || exit 1
+poetry run python -m mypy **/*.py || exit 1
