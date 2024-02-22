@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "cmdh"
+version = "0.1.0"
+description = ""
+authors = ["Roee Shapira <ro33.sha@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+langchain = "^0.1.8"
+langchain-community = "^0.0.21"
+langchain-core = "^0.1.25"
+tqdm = "^4.66.2"
+ollama = "^0.1.6"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.8.0"
+black = "^24.2.0"
+types-tqdm = "^4.66.0.20240106"
+
+[tool.poetry.scripts]
+start = "cmdh.main:main"
+
+[tool.pyright]
+venvPath = "/Users/roee/Library/Caches/pypoetry/virtualenvs/cmdh-o7oLoMPX-py3.12"
+venv = "cmdh"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
