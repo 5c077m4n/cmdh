@@ -14,13 +14,19 @@ def main() -> None:
         qa_chain = RetrievalQA.from_chain_type(
             ollama, retriever=vector_store.as_retriever()
         )
+
         response = qa_chain.invoke(
             {
-                "query": "Please complete the following command for me with all of its flags and subcommands: `git commit`"
+                "query": " ".join(
+                    [
+                        "Please complete the following command for me with all of its flags and subcommands: `tar`.",
+                        "Please list all of the options as a single array of strings and do not add any explanations about any of them.",
+                        "Please make sure that thee response is a valid JSON.",
+                    ]
+                )
             }
         )
-
-        print(response)
+        print(response["result"])
 
 
 if __name__ == "__main__":
