@@ -1,43 +1,26 @@
-from collections.abc import Mapping, Sequence
-
-import ollama
+from langchain.chains import RetrievalQA
+from langchain_community.llms.ollama import Ollama
 
 from cmdh.llm_server import OllamaServer
+from cmdh.vector_store import init_vector_store
 
 OLLAMA_MODEL = "mistral:latest"
 
 
-def embeddings_fn(prompt: str) -> Sequence[float]:
-    return ollama.embeddings(model=OLLAMA_MODEL, prompt=prompt)
-
-
 def main() -> None:
     with OllamaServer():
-        ollama_models = ollama.list()["models"]
-        if OLLAMA_MODEL not in [model_info["model"] for model_info in ollama_models]:
-            print("Pulling requested model...")
-            ollama.pull(OLLAMA_MODEL)
-
-        response = ollama.chat(
-            model=OLLAMA_MODEL,
-            format="json",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "Please respond only valid JSONs",
-                },
-                {
-                    "role": "system",
-                    "content": "You are a CLI completion tool, only complete the incoming partail command to ba a valid CLI command",
-                },
-                {"role": "user", "content": "git commit"},
-            ],
+        ollama = Ollama(model=OLLAMA_MODEL)
+        vector_store = init_vector_store()
+        qa_chain = RetrievalQA.from_chain_type(
+            ollama, retriever=vector_store.as_retriever()
         )
-        if isinstance(response, Mapping):
-            print(response["message"]["content"])
-        else:
-            for chunk in response:
-                print(chunk["message"]["content"], end="", flush=True)
+        response = qa_chain.invoke(
+            {
+                "query": "Please complete the following command for me with all of its flags and subcommands: `git commit`"
+            }
+        )
+
+        print(response)
 
 
 if __name__ == "__main__":

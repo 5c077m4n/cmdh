@@ -11,13 +11,12 @@ python = "^3.12"
 langchain = "^0.1.8"
 langchain-community = "^0.0.21"
 langchain-core = "^0.1.25"
-tqdm = "^4.66.2"
-ollama = "^0.1.6"
+gpt4all = "^2.2.1.post1"
+chromadb = "^0.4.23"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.8.0"
 black = "^24.2.0"
-types-tqdm = "^4.66.0.20240106"
 
 [tool.poetry.scripts]
 start = "cmdh.main:main"
