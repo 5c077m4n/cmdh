@@ -1,10 +1,10 @@
-import subprocess
+from datetime import datetime
 from os import environ
 from pathlib import Path
-from tempfile import NamedTemporaryFile
 
-from langchain.document_loaders.text import TextLoader
+from git import Repo
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders.git import GitLoader
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores.chroma import Chroma
 
@@ -14,19 +14,33 @@ CHROMA_PERSIST_DIR = Path(
 
 
 def init_vector_store() -> Chroma:
-    with NamedTemporaryFile() as f:
-        subprocess.call(["man", "git"], stdout=f)
-        loader = TextLoader(f.name)
-        data = loader.load()
+    repo_path = CHROMA_PERSIST_DIR.joinpath("data_repos").joinpath("tldr").__str__()
+    repo = Repo.clone_from("https://github.com/tldr-pages/tldr", to_path=repo_path)
+    branch = repo.head.reference
 
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=20)
-        all_splits = text_splitter.split_documents(data)
+    print(f"[{datetime.now()}] Loading git repo...")
+    loader = GitLoader(
+        repo_path,
+        branch=branch.__str__(),
+        file_filter=lambda file_path: (
+            "/pages/" in file_path and file_path.endswith(".md")
+        ),
+    )
+    print(f"[{datetime.now()}] Done loading git repo")
+    print(f"[{datetime.now()}] Starting data load...")
+    data = loader.load()
+    print(f"[{datetime.now()}] Done loading data")
 
-        ollama_embedding = OllamaEmbeddings(model="mistral:latest")
-        vector_store = Chroma.from_documents(
-            collection_name="man_pages",
-            documents=all_splits,
-            embedding=ollama_embedding,
-            persist_directory=CHROMA_PERSIST_DIR.__str__(),
-        )
-        return vector_store
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=20)
+    all_splits = text_splitter.split_documents(data)
+
+    ollama_embedding = OllamaEmbeddings(model="mistral:latest")
+    print(f"[{datetime.now()}] Creating vector store...")
+    vector_store = Chroma.from_documents(
+        collection_name="tldr_pages",
+        documents=all_splits,
+        embedding=ollama_embedding,
+        persist_directory=CHROMA_PERSIST_DIR.__str__(),
+    )
+    print(f"[{datetime.now()}] Finished creating vector store")
+    return vector_store
