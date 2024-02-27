@@ -1,4 +1,3 @@
-from datetime import datetime
 from os import environ
 from pathlib import Path
 
@@ -13,34 +12,37 @@ CHROMA_PERSIST_DIR = Path(
 ).joinpath("cmdh")
 
 
-def init_vector_store() -> Chroma:
-    repo_path = CHROMA_PERSIST_DIR.joinpath("data_repos").joinpath("tldr").__str__()
-    repo = Repo.clone_from("https://github.com/tldr-pages/tldr", to_path=repo_path)
-    branch = repo.head.reference
+def feed_vector_store(store: Chroma) -> None:
+    repo_path = CHROMA_PERSIST_DIR.joinpath("data_repos").joinpath("tldr")
+    if repo_path.exists():
+        repo = Repo(repo_path)
+        repo.remotes.origin.pull()
+    else:
+        repo = Repo.clone_from("https://github.com/tldr-pages/tldr", to_path=repo_path)
 
-    print(f"[{datetime.now()}] Loading git repo...")
+    branch = repo.head.reference
     loader = GitLoader(
-        repo_path,
+        repo_path=repo_path.__str__(),
         branch=branch.__str__(),
         file_filter=lambda file_path: (
             "/pages/" in file_path and file_path.endswith(".md")
         ),
     )
-    print(f"[{datetime.now()}] Done loading git repo")
-    print(f"[{datetime.now()}] Starting data load...")
     data = loader.load()
-    print(f"[{datetime.now()}] Done loading data")
 
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=20)
     all_splits = text_splitter.split_documents(data)
+    store.add_documents(all_splits)
 
+
+def init_vector_store() -> Chroma:
     ollama_embedding = OllamaEmbeddings(model="mistral:latest")
-    print(f"[{datetime.now()}] Creating vector store...")
-    vector_store = Chroma.from_documents(
-        collection_name="tldr_pages",
-        documents=all_splits,
-        embedding=ollama_embedding,
+    store = Chroma(
         persist_directory=CHROMA_PERSIST_DIR.__str__(),
+        embedding_function=ollama_embedding,
+        collection_name="tldr_pages",
     )
-    print(f"[{datetime.now()}] Finished creating vector store")
-    return vector_store
+    if store._collection.count() == 0:
+        feed_vector_store(store)
+
+    return store

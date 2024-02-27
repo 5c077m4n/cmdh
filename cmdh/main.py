@@ -19,7 +19,7 @@ def main() -> None:
             {
                 "query": " ".join(
                     [
-                        "Please complete the following command for me with all of its flags and subcommands: `tar`.",
+                        "Please complete the following command for me with all of its flags and subcommands: `git commit`.",
                         "Please list all of the options as a single array of strings and do not add any explanations about any of them.",
                         "Please make sure that thee response is a valid JSON.",
                     ]
