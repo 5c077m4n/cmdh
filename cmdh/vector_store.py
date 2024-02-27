@@ -1,15 +1,10 @@
-from os import environ
-from pathlib import Path
-
 from git import Repo
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders.git import GitLoader
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores.chroma import Chroma
 
-CHROMA_PERSIST_DIR = Path(
-    environ.get("XDG_STATE_HOME", environ.get("HOME", "~") + "/.local/state")
-).joinpath("cmdh")
+from cmdh.consts import CHROMA_PERSIST_DIR, OLLAMA_MODEL
 
 
 def feed_vector_store(store: Chroma) -> None:
@@ -36,7 +31,7 @@ def feed_vector_store(store: Chroma) -> None:
 
 
 def init_vector_store() -> Chroma:
-    ollama_embedding = OllamaEmbeddings(model="mistral:latest")
+    ollama_embedding = OllamaEmbeddings(model=OLLAMA_MODEL)
     store = Chroma(
         persist_directory=CHROMA_PERSIST_DIR.__str__(),
         embedding_function=ollama_embedding,

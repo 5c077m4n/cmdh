@@ -1,10 +1,11 @@
+import sys
+
 from langchain.chains import RetrievalQA
 from langchain_community.llms.ollama import Ollama
 
+from cmdh.consts import OLLAMA_MODEL
 from cmdh.llm_server import OllamaServer
 from cmdh.vector_store import init_vector_store
-
-OLLAMA_MODEL = "mistral:latest"
 
 
 def main() -> None:
@@ -19,7 +20,7 @@ def main() -> None:
             {
                 "query": " ".join(
                     [
-                        "Please complete the following command for me with all of its flags and subcommands: `git commit`.",
+                        f"Please complete the following command for me with all of its flags and subcommands: `{" ".join(sys.argv[1:])}`.",
                         "Please list all of the options as a single array of strings and do not add any explanations about any of them.",
                         "Please make sure that thee response is a valid JSON.",
                     ]
