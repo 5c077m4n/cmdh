@@ -3,9 +3,9 @@ import sys
 from langchain.chains import RetrievalQA
 from langchain_community.llms.ollama import Ollama
 
-from cmdh.consts import OLLAMA_MODEL
-from cmdh.llm_server import OllamaServer
-from cmdh.vector_store import init_vector_store
+from cmdh.libs.consts import OLLAMA_MODEL
+from cmdh.libs.llm_server import OllamaServer
+from cmdh.libs.vector_store import init_vector_store
 
 
 def main() -> None:
@@ -13,7 +13,8 @@ def main() -> None:
         ollama = Ollama(model=OLLAMA_MODEL)
         vector_store = init_vector_store()
         qa_chain = RetrievalQA.from_chain_type(
-            ollama, retriever=vector_store.as_retriever()
+            ollama,
+            retriever=vector_store.as_retriever()
         )
 
         response = qa_chain.invoke(

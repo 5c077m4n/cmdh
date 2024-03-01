@@ -1,10 +1,11 @@
+from chromadb.config import Settings
 from git import Repo
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders.git import GitLoader
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores.chroma import Chroma
 
-from cmdh.consts import CHROMA_PERSIST_DIR, OLLAMA_MODEL
+from cmdh.libs.consts import CHROMA_PERSIST_DIR, OLLAMA_MODEL
 
 
 def feed_vector_store(store: Chroma) -> None:
@@ -36,6 +37,7 @@ def init_vector_store() -> Chroma:
         persist_directory=CHROMA_PERSIST_DIR.__str__(),
         embedding_function=ollama_embedding,
         collection_name="tldr_pages",
+        client_settings=Settings(anonymized_telemetry=False),
     )
     if store._collection.count() == 0:
         feed_vector_store(store)

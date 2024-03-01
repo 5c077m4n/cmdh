@@ -21,11 +21,7 @@ black = "^24.2.0"
 
 [tool.poetry.scripts]
 start = "cmdh.main:main"
-train = "cmdh.vector_store:init_vector_store"
-
-[tool.pyright]
-venvPath = "/Users/roee/Library/Caches/pypoetry/virtualenvs/cmdh-o7oLoMPX-py3.12"
-venv = "cmdh"
+train = "cmdh.libs.vector_store:init_vector_store"
 
 [build-system]
 requires = ["poetry-core"]
